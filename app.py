@@ -295,7 +295,7 @@ depth = out["DEPTH_m"].values.astype(float)
 intervals = intervals_from_mask(depth, out["PayZone_pred"].values.astype(bool), min_thk=0.5)
 
 # NET = predicted pay
-net_mask = out["PayZone_pred"].values.astype(bool)
+net_mask = gross_mask & out["PayZone_pred"].values.astype(bool)
 
 # GROSS = simple reservoir-quality flag (same intent as before, but thickness computed correctly)
 gross_mask = ((df.get("ZDEN", np.nan).notna()) & (RDeep > 10) & (Phi_eff_base > phi_cut)).fillna(False).values.astype(bool)
@@ -304,7 +304,7 @@ net_thk = thickness_from_mask(depth, net_mask)
 gross_thk = thickness_from_mask(depth, gross_mask)
 ng_ratio = (net_thk / gross_thk * 100.0) if gross_thk > 0 else 0.0
 
-st.subheader("Net/Gross Summary (Fixed)")
+st.subheader("Net/Gross Summary (Fixed: Net is subset of Gross)")
 st.write({
     "Gross thickness (approx)": f"{gross_thk:.1f}",
     "Net pay (predicted)": f"{net_thk:.1f}",
