@@ -294,11 +294,12 @@ def intervals_from_mask(depth: np.ndarray, mask: np.ndarray, min_thk=0.5):
 depth = out["DEPTH_m"].values.astype(float)
 intervals = intervals_from_mask(depth, out["PayZone_pred"].values.astype(bool), min_thk=0.5)
 
-# NET = predicted pay
+# GROSS = simple reservoir-quality flag (reservoir-quality by cutoffs)
+gross_mask = ((df.get("ZDEN", np.nan).notna()) & (RDeep > 10) & (Phi_eff_base > phi_cut)).fillna(False).values.astype(bool)
+
+# NET = pay within gross (ensures Net ≤ Gross)
 net_mask = gross_mask & out["PayZone_pred"].values.astype(bool)
 
-# GROSS = simple reservoir-quality flag (same intent as before, but thickness computed correctly)
-gross_mask = ((df.get("ZDEN", np.nan).notna()) & (RDeep > 10) & (Phi_eff_base > phi_cut)).fillna(False).values.astype(bool)
 
 net_thk = thickness_from_mask(depth, net_mask)
 gross_thk = thickness_from_mask(depth, gross_mask)
